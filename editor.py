@@ -31,7 +31,7 @@ class Editor:
         self.tilemap = Tilemap(self, tile_size=16)
 
         try:
-            self.tilemap.load('map.json')
+            self.tilemap.load('0.json')
         except FileNotFoundError:
             pass
 
@@ -122,7 +122,7 @@ class Editor:
                 if event.type == KEYDOWN:
                     if self.ctrl:
                         if event.key == K_s:
-                            self.tilemap.save('map.json')
+                            self.tilemap.save('0.json')
 
                     if event.key == K_a:
                         self.movement[0] = True

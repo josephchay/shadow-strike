@@ -95,6 +95,20 @@ class Enemy(PhysicsEntity):
             else:
                 self.flip = not self.flip
             self.walking = max(0, self.walking - 1)
+
+            if not self.walking:
+                # distance between enemy and player
+                distance = (self.game.player.pos[0] - self.pos[0], self.game.player.pos[1] - self.pos[1])
+
+                # if the player is within 16 pixels of the enemy on the y-axis
+                if abs(distance[1]) < 16:
+                    # if enemy is facing left and the player is the left of the enemy
+                    if self.flip and distance[0] < 0:
+                        self.game.projectiles.append([[self.hitbox().centerx - 7, self.hitbox().centery], -1.5, 0])
+                    # if enemy is facing right and the player is the right of the enemy
+                    if not self.flip and distance[0] > 0:
+                        self.game.projectiles.append([[self.hitbox().centerx + 7, self.hitbox().centery], 1.5, 0])
+
         elif random.random() < 0.01:
             self.walking = random.randint(30, 120)
 
@@ -104,6 +118,14 @@ class Enemy(PhysicsEntity):
             self.set_action('run')
         else:
             self.set_action('idle')
+
+    def render(self, surface, offset=(0, 0)):
+        super().render(surface, offset=offset)
+
+        if self.flip:
+            surface.blit(pygame.transform.flip(self.game.assets['gun'], True, False), (self.hitbox().centerx - 4 - self.game.assets['gun'].get_width() - offset[0], self.hitbox().centery - offset[1]))
+        else:
+            surface.blit(self.game.assets['gun'], (self.hitbox().centerx + 4 - offset[0], self.hitbox().centery - offset[1]))
 
 
 class Player(PhysicsEntity):
@@ -202,7 +224,7 @@ class Player(PhysicsEntity):
                 return True
 
         elif self.jumps:
-            self.velocity[1] = -3
+            self.velocity[1] = -3.5
             self.jumps -= 1
             self.air_time = 5
             return True

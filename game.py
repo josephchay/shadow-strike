@@ -40,6 +40,8 @@ class Game:
             'player/wall_slide': Animation(load_images('entities/player/wall_slide')),
             'particles/leaf': Animation(load_images('particles/leaf'), image_duration=20, loop=False),
             'particles/particle': Animation(load_images('particles/particle'), image_duration=6, loop=False),
+            'gun': load_image('gun.png'),
+            'projectile': load_image('projectile.png'),
         }
 
         self.clouds = Clouds(self.assets['clouds'], count=16)
@@ -47,7 +49,10 @@ class Game:
         self.player = Player(self, (50, 50), (8, 15))
 
         self.tilemap = Tilemap(self)
-        self.tilemap.load('map.json')
+        self.load_level(0)
+
+    def load_level(self, map_id):
+        self.tilemap.load('data/maps/' + str(map_id) + '.json')
 
         self.leaf_spawners = []
         for tree in self.tilemap.extract([('large_decor', 2)], keep=True):
@@ -60,6 +65,7 @@ class Game:
             else:
                 self.enemies.append(Enemy(self, spawner['pos'], (8, 15)))  # 8 by 15 is the dimensions of the image, changes depending on the image
 
+        self.projectiles = []
         self.particles = []
 
         self.scroll = [0, 0]
@@ -90,6 +96,23 @@ class Game:
 
             self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
             self.player.render(self.display, offset=render_scroll)
+
+            # [[x, y], speed-direction, timer]
+            for projectile in self.projectiles.copy():
+                projectile[0][0] += projectile[1]
+                projectile[2] += 1
+                image = self.assets['projectile']
+                self.display.blit(image, (projectile[0][0] - image.get_width() / 2 - render_scroll[0], projectile[0][1] - image.get_height() / 2 - render_scroll[1]))
+
+                # check if the projectile has hit a solid tile
+                if self.tilemap.solid_check(projectile[0]):
+                    self.projectiles.remove(projectile)
+                elif projectile[2] > 360:  # 360 frames = 6 seconds timer
+                    self.projectiles.remove(projectile)
+                elif abs(self.player.dashing) < 50:
+                    # check if the projectile has hit the player
+                    if self.player.hitbox().collidepoint(projectile[0]):
+                        self.projectiles.remove(projectile)
 
             for particle in self.particles.copy():
                 kill = particle.update()
