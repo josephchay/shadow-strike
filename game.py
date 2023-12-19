@@ -7,7 +7,7 @@ class Game:
     def __init__(self):
         pygame.init()
 
-        pygame.display.set_caption('Ninja Game')
+        pygame.display.set_caption('Shadow Strike')
         self.screen = pygame.display.set_mode((640, 480))
         self.display = pygame.Surface((320, 240))
 
