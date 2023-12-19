@@ -129,6 +129,9 @@ class Enemy(PhysicsEntity):
 
         if abs(self.game.player.dashing) >= 50:
             if self.hitbox().colliderect(self.game.player.hitbox()):
+
+                self.game.screenshake = max(20, self.game.screenshake)
+
                 for i in range(30):
                     angle = random.random() * math.pi * 2
                     speed = random.random() * 5
@@ -163,6 +166,8 @@ class Player(PhysicsEntity):
         self.air_time += 1
 
         if self.air_time > 200:
+            if not self.game.dead:
+                self.game.screenshake = max(20, self.game.screenshake)
             self.game.dead += 1
 
         if self.collisions['down']:
