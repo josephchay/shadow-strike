@@ -64,6 +64,17 @@ class Tilemap:
 
         return tiles
 
+    def solid_check(self, pos):
+        """
+        Checks if the tile at the given position is solid.
+        :param pos: the position to check
+        :return: the tile at the given position if it is solid, otherwise None
+        """
+        tile_location = str(int(pos[0] // self.tile_size)) + ';' + str(int(pos[1] // self.tile_size))
+        if tile_location in self.tilemap:
+            if self.tilemap[tile_location]['type'] in PHYSICS_TILES:
+                return self.tilemap[tile_location]
+
     def physics_rects_around(self, pos):
         rects = []
 

@@ -4,7 +4,7 @@ import sys
 import pygame
 from pygame.locals import *
 
-from scripts.entities import PhysicsEntity, Player
+from scripts.entities import PhysicsEntity, Player, Enemy
 from scripts.utils import load_image, load_images, Animation
 from scripts.tilemap import Tilemap
 from scripts.clouds import Clouds
@@ -31,6 +31,8 @@ class Game:
             'player': load_image('entities/player.png'),
             'background': load_image('background.png'),
             'clouds': load_images('clouds'),
+            'enemy/idle': Animation(load_images('entities/enemy/idle'), image_duration=6),
+            'enemy/run': Animation(load_images('entities/enemy/run'), image_duration=4),
             'player/idle': Animation(load_images('entities/player/idle'), image_duration=6),
             'player/run': Animation(load_images('entities/player/run'), image_duration=4),
             'player/jump': Animation(load_images('entities/player/jump')),
@@ -50,6 +52,13 @@ class Game:
         self.leaf_spawners = []
         for tree in self.tilemap.extract([('large_decor', 2)], keep=True):
             self.leaf_spawners.append(pygame.Rect(4 + tree['pos'][0], 4 + tree['pos'][1], 23, 13))
+
+        self.enemies = []
+        for spawner in self.tilemap.extract([('spawners', 0), ('spawners', 1)]):
+            if spawner['variant'] == 0:
+                self.player.pos = spawner['pos']
+            else:
+                self.enemies.append(Enemy(self, spawner['pos'], (8, 15)))  # 8 by 15 is the dimensions of the image, changes depending on the image
 
         self.particles = []
 
@@ -75,6 +84,10 @@ class Game:
 
             self.tilemap.render(self.display, offset=render_scroll)
 
+            for enemy in self.enemies:
+                enemy.update(self.tilemap, (0, 0))
+                enemy.render(self.display, offset=render_scroll)
+
             self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
             self.player.render(self.display, offset=render_scroll)
 
@@ -83,7 +96,7 @@ class Game:
                 particle.render(self.display, offset=render_scroll)
 
                 if particle.type == 'leaf':
-                    particle.position[0] += math.sin(particle.animation.frame * 0.035) * 0.3
+                    particle.pos[0] += math.sin(particle.animation.frame * 0.035) * 0.3
                 if kill:
                     self.particles.remove(particle)
 
