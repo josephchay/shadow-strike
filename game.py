@@ -96,7 +96,7 @@ class Game:
                     if event.key == K_d:
                         self.movement[1] = True
                     if event.key == K_w:
-                        self.player.velocity[1] = -3
+                        self.player.jump()
                 if event.type == KEYUP:
                     if event.key == K_a:
                         self.movement[0] = False
