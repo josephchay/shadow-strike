@@ -27,6 +27,10 @@ class Tilemap:
         self.offgrid_tiles = []
 
     def extract(self, id_pairs, keep=False):
+        """
+        The id_pairs is a list of id_pair, each id_pair is a tuple of (type, variant).
+        The keep parameter determines whether the extracted tiles should be removed from the tilemap.
+        """
         matches = []
 
         for tile in self.offgrid_tiles.copy():
