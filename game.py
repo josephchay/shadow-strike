@@ -63,6 +63,7 @@ class Game:
         for spawner in self.tilemap.extract([('spawners', 0), ('spawners', 1)]):
             if spawner['variant'] == 0:
                 self.player.pos = spawner['pos']
+                self.player.air_time = 0
             else:
                 self.enemies.append(Enemy(self, spawner['pos'], (8, 15)))  # 8 by 15 is the dimensions of the image, changes depending on the image
 
@@ -71,10 +72,16 @@ class Game:
         self.sparks = []
 
         self.scroll = [0, 0]
+        self.dead = 0
 
     def run(self):
         while True:
             self.display.blit(self.assets['background'], (0, 0))
+
+            if self.dead:
+                self.dead += 1
+                if self.dead > 40:
+                    self.load_level(0)
 
             self.scroll[0] += (self.player.hitbox().centerx - self.display.get_width() / 2 - self.scroll[0]) / 30
             self.scroll[1] += (self.player.hitbox().centery - self.display.get_height() / 2 - self.scroll[1]) / 30
@@ -98,8 +105,9 @@ class Game:
                 if kill:
                     self.enemies.remove(enemy)
 
-            self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
-            self.player.render(self.display, offset=render_scroll)
+            if not self.dead:
+                self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
+                self.player.render(self.display, offset=render_scroll)
 
             # [[x, y], speed-direction, timer]
             for projectile in self.projectiles.copy():
@@ -120,6 +128,7 @@ class Game:
                     # check if the projectile has hit the player
                     if self.player.hitbox().collidepoint(projectile[0]):
                         self.projectiles.remove(projectile)
+                        self.dead += 1
 
                         for i in range(30):
                             angle = random.random() * math.pi * 2
