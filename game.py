@@ -18,10 +18,6 @@ class Game:
 
         self.clock = pygame.time.Clock()
 
-        self.img = pygame.image.load('data/images/clouds/cloud_1.png')
-        self.img.set_colorkey((0, 0, 0))
-
-        self.img_pos = [160, 260]
         self.movement = [False, False]
 
         self.assets = {
