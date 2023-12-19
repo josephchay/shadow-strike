@@ -4,6 +4,7 @@ import random
 import pygame
 
 from scripts.particle import Particle
+from scripts.spark import Spark
 
 
 class PhysicsEntity:
@@ -105,9 +106,16 @@ class Enemy(PhysicsEntity):
                     # if enemy is facing left and the player is the left of the enemy
                     if self.flip and distance[0] < 0:
                         self.game.projectiles.append([[self.hitbox().centerx - 7, self.hitbox().centery], -1.5, 0])
+
+                        for i in range(4):
+                            self.game.sparks.append(Spark(self.game.projectiles[-1][0], random.random() - 0.5 + math.pi, 2 + random.random()))
+
                     # if enemy is facing right and the player is the right of the enemy
                     if not self.flip and distance[0] > 0:
                         self.game.projectiles.append([[self.hitbox().centerx + 7, self.hitbox().centery], 1.5, 0])
+
+                        for i in range(4):
+                            self.game.sparks.append(Spark(self.game.projectiles[-1][0], random.random() - 0.5, 2 + random.random()))
 
         elif random.random() < 0.01:
             self.walking = random.randint(30, 120)
