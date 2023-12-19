@@ -2,6 +2,7 @@ import sys
 import pygame
 from pygame.locals import *
 
+from scripts.entities import PhysicsEntity
 from scripts.utils import load_image, load_images
 from scripts.tilemap import Tilemap
 
@@ -30,6 +31,8 @@ class Game:
             'player': load_image('entities/player.png')
         }
 
+        self.player = PhysicsEntity(self, 'player', (50, 50), (8, 15))
+
         self.tilemap = Tilemap(self)
 
     def run(self):
@@ -37,6 +40,11 @@ class Game:
             self.display.fill((14, 219, 248))
 
             self.tilemap.render(self.display)
+
+            self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
+            self.player.render(self.display)
+
+            print(self.tilemap.physics_rects_around(self.player.pos))
 
             for event in pygame.event.get():
                 if (event.type == QUIT) or (event.type == KEYUP and event.key == K_ESCAPE):
@@ -47,6 +55,8 @@ class Game:
                         self.movement[0] = True
                     if event.key == K_d:
                         self.movement[1] = True
+                    if event.key == K_w:
+                        self.player.velocity[1] = -3
                 if event.type == KEYUP:
                     if event.key == K_a:
                         self.movement[0] = False
