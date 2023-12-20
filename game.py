@@ -19,7 +19,8 @@ class Game:
 
         pygame.display.set_caption('Shadow Strike')
         self.screen = pygame.display.set_mode((640, 480))
-        self.display = pygame.Surface((320, 240))
+        self.display = pygame.Surface((320, 240), pygame.SRCALPHA)
+        self.display_without_outline = pygame.Surface((320, 240))
 
         self.clock = pygame.time.Clock()
 
@@ -82,7 +83,8 @@ class Game:
 
     def run(self):
         while True:
-            self.display.blit(self.assets['background'], (0, 0))
+            self.display.fill((0, 0, 0, 0))
+            self.display_without_outline.blit(self.assets['background'], (0, 0))
 
             self.screenshake = max(0, self.screenshake - 1)
 
@@ -116,7 +118,7 @@ class Game:
                     self.particles.append(Particle(self, 'leaf', pos, velocity=[-0.1, 0.3], frame=random.randint(0, 20)))
 
             self.clouds.update()
-            self.clouds.render(self.display, offset=render_scroll)
+            self.clouds.render(self.display_without_outline, offset=render_scroll)
 
             self.tilemap.render(self.display, offset=render_scroll)
 
@@ -165,6 +167,12 @@ class Game:
                 if kill:
                     self.sparks.remove(spark)
 
+            display_mask = pygame.mask.from_surface(self.display)
+            display_silhouette = display_mask.to_surface(setcolor=(0, 0, 0, 180), unsetcolor=(0, 0, 0, 0))
+
+            for offset in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                self.display_without_outline.blit(display_silhouette, offset)
+
             for particle in self.particles.copy():
                 kill = particle.update()
                 particle.render(self.display, offset=render_scroll)
@@ -200,8 +208,10 @@ class Game:
                 transition_surface.set_colorkey((255, 255, 255))
                 self.display.blit(transition_surface, (0, 0))
 
+            self.display_without_outline.blit(self.display, (0, 0))
+
             screenshake_offset = (random.random() * self.screenshake - self.screenshake / 2, random.random() * self.screenshake - self.screenshake / 2)
-            self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), screenshake_offset)
+            self.screen.blit(pygame.transform.scale(self.display_without_outline, self.screen.get_size()), screenshake_offset)
 
             pygame.display.update()
             self.clock.tick(60)
